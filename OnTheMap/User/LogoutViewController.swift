@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class LogoutViewController: UIViewController, UINavigationControllerDelegate {
+class LogoutViewController: UIViewController {
     
     @IBOutlet var logoutButton: UIButton!
     

@@ -18,7 +18,7 @@ class UdacityData: NSObject {
         static var objectId = ""
         static var mediaURL = ""
     }
-
+    
     enum Endpoints {
         
         static let base = "https://onthemap-api.udacity.com/v1"
@@ -51,7 +51,7 @@ class UdacityData: NSObject {
     override init() {
         super.init()
     }
- 
+    
     class func shared() -> UdacityData {
         
         struct GetInfo {
@@ -59,7 +59,7 @@ class UdacityData: NSObject {
         }
         return GetInfo.shared
     }
-  
+    
     class func getLoggedInUserProfile(completion: @escaping (Bool, Error?) -> Void) {
         RequestHelpers.taskForGETRequest(url: Endpoints.getLoggedInUserProfile.url, apiType: "Udacity", responseType: StudentInformation.self) { (response, error) in
             if let response = response {
@@ -101,7 +101,7 @@ class UdacityData: NSObject {
         task.resume()
     }
     
- 
+    
     class func getStudentLocations(completion: @escaping ([StudentInformation]?, Error?) -> Void) {
         RequestHelpers.taskForGETRequest(url: Endpoints.getStudentLocations.url, apiType: "Parse", responseType: StudentsLocation.self) { (response, error) in
             if let response = response {
@@ -112,13 +112,20 @@ class UdacityData: NSObject {
         }
     }
     
-   
+    
     class func addStudentLocation(information: StudentInformation, completion: @escaping (Bool, Error?) -> Void) {
         let body = "{\"uniqueKey\": \"\(information.uniqueKey ?? "")\", \"firstName\": \"\(information.firstName)\", \"lastName\": \"\(information.lastName)\",\"mapString\": \"\(information.mapString ?? "")\", \"mediaURL\": \"\(information.mediaURL ?? "")\",\"latitude\": \(information.latitude ?? 0.0), \"longitude\": \(information.longitude ?? 0.0)}"
-        RequestHelpers.taskForPOSTRequest(url: Endpoints.addLocation.url, apiType: "Parse", responseType: PostLocation.self, body: body, httpMethod: "POST") { (response, error) in
+        RequestHelpers.taskForPOSTRequest(
+            url: Endpoints.addLocation.url,
+            apiType: "Parse",
+            responseType: PostLocation.self,
+            body: body,
+            httpMethod: "POST"
+        ) { (response, error) in
             if let response = response, response.createdAt != nil {
                 Auth.objectId = response.objectId ?? ""
                 completion(true, nil)
+                return
             }
             completion(false, error)
         }
@@ -133,5 +140,5 @@ class UdacityData: NSObject {
             completion(false, error)
         }
     }
-
+    
 }

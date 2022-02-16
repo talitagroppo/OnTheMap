@@ -11,23 +11,23 @@ import CoreLocation
 class ListViewController: UITableViewController {
     
     static var identifier = "cell"
-
+    
     @IBOutlet var tableViewList: UITableView!
     
     var students = [StudentInformation]()
     
-      override func viewDidLoad() {
-          super.viewDidLoad()
-          tableViewList.delegate = self
-          tableViewList.dataSource = self
-      }
-      
-      override func viewDidAppear(_ animated: Bool) {
-          super.viewDidAppear(true)
-          allLocations = saveData.load()
-          tableViewList.reloadData()
-          getStudentsList()
-      }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tableViewList.delegate = self
+        tableViewList.dataSource = self
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        tableViewList.reloadData()
+        getStudentsList()
+        navigationController?.navigationBar.isHidden = false
+    }
     
     
     @IBAction func addNewData(_ sender: UIButton) {
@@ -35,53 +35,37 @@ class ListViewController: UITableViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
-    let saveData = SaveData()
+    @IBAction func refreshList(_ sender: UIBarButtonItem) {
+        getStudentsList()
+    }
     
-    lazy var allLocations: [StudentsLocation] = {
-        return saveData.load()
-    }()
+    func getStudentsList() {
+        UdacityData.getStudentLocations() {students, error in
+            self.students = students ?? []
+            DispatchQueue.main.async {
+                self.tableViewList.reloadData()
+            }
+        }
+    }
     
-      @IBAction func logout(_ sender: UIBarButtonItem) {
-          let vc = LoginViewController()
-          UdacityData.logout {
-              DispatchQueue.main.async {
-                  self.dismiss(animated: true, completion: nil)
-              }
-          }
-          navigationController?.pushViewController(vc, animated: true)
-      }
-      
-      @IBAction func refreshList(_ sender: UIBarButtonItem) {
-          getStudentsList()
-      }
-      
-      func getStudentsList() {
-          UdacityData.getStudentLocations() {students, error in
-              self.students = students ?? []
-              DispatchQueue.main.async {
-                  self.tableViewList.reloadData()
-              }
-          }
-      }
-
     override func numberOfSections(in tableView: UITableView) -> Int {
-          return 1
-      }
-
+        return 1
+    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-          return students.count
-      }
-
+        return students.count
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ListViewController.identifier, for: indexPath)
-          let student = students[indexPath.row]
+        let student = students[indexPath.row]
         cell.textLabel?.text = "        \(student.firstName)" + " " + "\(student.lastName)"
-          cell.detailTextLabel?.text = "\(student.mediaURL ?? "")"
-          return cell
-      }
-      
+        cell.detailTextLabel?.text = "\(student.mediaURL ?? "")"
+        return cell
+    }
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-          let student = students[indexPath.row]
+        let student = students[indexPath.row]
         userUrl(student.mediaURL ?? "")
-      }
-  }
+    }
+}
