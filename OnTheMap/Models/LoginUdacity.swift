@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 class LoginUdacity {
-    func execute(email: String, password: String, completion: @escaping (Bool) -> Void) {
+    func execute(email: String, password: String, completion: @escaping (LoginUdacityResult?) -> Void) {
         var request = URLRequest(url: URL(string: "https://onthemap-api.udacity.com/v1/session")!)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -18,7 +18,7 @@ class LoginUdacity {
         let session = URLSession.shared
         let task = session.dataTask(with: request) { data, _, error in
             if error != nil {
-                completion(false)
+                completion(nil)
                 return
             }
             let range = 5..<data!.count
@@ -26,10 +26,10 @@ class LoginUdacity {
             
             guard let decoded = try? JSONDecoder().decode(LoginUdacityResult.self, from: newData!) else {
                 print(String(data: data!, encoding: .utf8) as Any)
-                completion(false)
+                completion(nil)
                 return
             }
-            completion(decoded.account.registered)
+            completion(decoded)
         }
         task.resume()
     }

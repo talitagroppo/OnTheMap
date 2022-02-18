@@ -17,7 +17,7 @@ class RequestHelpers {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         } else {
             request.addValue(Constants.ApplicationId, forHTTPHeaderField: "X-Parse-Application-Id")
-            request.addValue(Constants.APIKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
+            request.addValue(Constants.key, forHTTPHeaderField: "X-Parse-REST-API-Key")
         }
         let task = URLSession.shared.dataTask(with: request) { data, response, error  in
             if error != nil {

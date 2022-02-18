@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 
 class UdacityData: NSObject {
@@ -26,7 +27,7 @@ class UdacityData: NSObject {
         case getStudentLocations
         case addLocation
         case updateLocation
-        case getLoggedInUserProfile
+        case getLoggedInUserProfile(String)
         
         var stringValue: String {
             switch self {
@@ -36,8 +37,8 @@ class UdacityData: NSObject {
                 return Endpoints.base + "/StudentLocation"
             case .updateLocation:
                 return Endpoints.base + "/StudentLocation/" + Auth.objectId
-            case .getLoggedInUserProfile:
-                return Endpoints.base + "/users/" + Auth.key
+            case .getLoggedInUserProfile (let uniqueKey):
+                return Endpoints.base + "/users/" + uniqueKey
                 
             }
         }
@@ -61,16 +62,18 @@ class UdacityData: NSObject {
     }
     
     class func getLoggedInUserProfile(completion: @escaping (Bool, Error?) -> Void) {
-        RequestHelpers.taskForGETRequest(url: Endpoints.getLoggedInUserProfile.url, apiType: "Udacity", responseType: StudentInformation.self) { (response, error) in
-            if let response = response {
-                print("First Name : \(response.firstName) && Last Name : \(response.lastName) && Web : \(String(describing: response.mediaURL))" )
-                Auth.firstName = response.firstName
-                Auth.lastName = response.lastName
-                Auth.mediaURL = response.mediaURL ?? ""
-                completion(true, nil)
-            } else {
-                print("Failed to get user's profile.")
-                completion(false, error)
+        DispatchQueue.main.async {
+            guard let uniqueKey = (UIApplication.shared.delegate as? AppDelegate)?.uniqueKey else { fatalError() }
+            DispatchQueue.global(qos: .utility).async {
+                RequestHelpers.taskForGETRequest(url: Endpoints.getLoggedInUserProfile(uniqueKey).url, apiType: "Udacity", responseType: StudentInformation.self) { (response, error) in
+                    if let response = response {
+                        print(response)
+                        completion(true, nil)
+                    } else {
+                        print("Failed to get user's profile.")
+                        completion(false, error)
+                    }
+                }
             }
         }
     }
@@ -131,8 +134,8 @@ class UdacityData: NSObject {
         }
     }
     
-    class func updateStudentLocation(information: StudentInformation, completion: @escaping (Bool, Error?) -> Void) {
-        let body = "{\"uniqueKey\": \"\(information.uniqueKey ?? "")\", \"firstName\": \"\(information.firstName)\", \"lastName\": \"\(information.lastName)\",\"mapString\": \"\(information.mapString ?? "")\", \"mediaURL\": \"\(information.mediaURL ?? "")\",\"latitude\": \(information.latitude ?? 0.0), \"longitude\": \(information.longitude ?? 0.0)}"
+    class func updateStudentLocation(completion: @escaping (Bool, Error?) -> Void) {
+        let body = "{\"uniqueKey\": \"uniqueKey\", \"firstName\": \"firstName\", \"lastName\": \"lastName\",\"mapString\": \"mapString\", \"mediaURL\": \"mediaURL\",\"latitude\": latitude, \"longitude\": longitude}"
         RequestHelpers.taskForPOSTRequest(url: Endpoints.updateLocation.url, apiType: "Parse", responseType: UpdateLocationResponse.self, body: body, httpMethod: "PUT") { (response, error) in
             if let response = response, response.updatedAt != nil {
                 completion(true, nil)

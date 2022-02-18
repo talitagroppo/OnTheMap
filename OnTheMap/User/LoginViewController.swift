@@ -18,6 +18,14 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if ConnectNetwork.shared.isConnected {
+            return
+        } else {
+            ConnectNetwork.shared.stopMonitoring()
+            showAlert(message: "", title: "The Internet connection is offline, please try again later")
+            return
+        }
+            
     }
     
     var loginUdacity = LoginUdacity()
@@ -45,22 +53,19 @@ class LoginViewController: UIViewController {
               let password = password,
               password != ""
         else {
-            // MARK: - Precisa fazer um UIAlert para dizer ao usuario que os dados devem ser preenchidos.
             AlertType.alertTypeClass.alert(view: self, title: "Your need informe the data", message: "You can't be login without the data")
             
             return
         }
         loginUdacity.execute(email: email, password: password) { result in
-            if !result {
-                
-                // MARK: - Precisa fazer um UIAlert para dizer ao usuario que os dados devem ser preenchidos.
-                AlertType.alertTypeClass.alert(view: self, title: "Please, verify your email or password", message: "The data was insert wrong")
+            if !(result?.account.registered ?? false) {
+                AlertType.alertTypeClass.alert(view: self, title: "", message: "The credentials were incorrect, please check your email or/and your password.")
                 return
             }
             DispatchQueue.main.async {
+                let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
+                appDelegate?.uniqueKey = result?.account.key
                 guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "TabViewController") else {
-                    
-                    // MARK: - Precisa fazer um UIAlert para dizer ao usuario que os dados devem ser preenchidos.
                     AlertType.alertTypeClass.alert(view: self, title: "Happens a problem", message: "Please check again your information")
                     return
                 }
@@ -79,12 +84,11 @@ class LoginViewController: UIViewController {
         if passwordTextField.isFirstResponder {
             view.frame.origin.y = getKeyboardHeight(notification) * (-0.5)
         }
-}
+    }
 }
 class AlertType: NSObject {
     static let alertTypeClass = AlertType()
-
-    //Show alert
+    
     func alert(view: UIViewController, title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let defaultAction = UIAlertAction(title: "OK", style: .default, handler: { action in

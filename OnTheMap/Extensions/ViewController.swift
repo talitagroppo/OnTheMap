@@ -20,7 +20,7 @@ extension UIViewController {
             showAlert(message: "Cannot open link.", title: "Invalid Link")
             return
         }
-        UIApplication.shared.open(url, options: [:])
+        UIApplication.shared.open(url)
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

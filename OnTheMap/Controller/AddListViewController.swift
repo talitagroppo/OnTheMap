@@ -13,16 +13,16 @@ class AddListViewController: UIViewController {
     static var identifier = "AddListViewController"
     
     @IBOutlet var locationTextField: UITextField!
-    @IBOutlet var firstNameTextField: UITextField!
-    @IBOutlet var lastNameTextField: UITextField!
-    
-    
+   
     var objectId: String?
     
     var studentInformation: StudentInformation?
     
+    @IBOutlet var activityIndicator: UIActivityIndicatorView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(studentInformation)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,14 +39,6 @@ class AddListViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    @IBAction func logout(_ sender: UIButton) {
-        UdacityData.logout {
-            DispatchQueue.main.async {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") else { return }
-            self.navigationController?.pushViewController(vc, animated: false)
-        }
-        }
-    }
     @IBAction func findLocation(sender: UIButton) {
         guard let newLocation = locationTextField.text
         else { return }
@@ -59,6 +51,7 @@ class AddListViewController: UIViewController {
     }
     
     func geocodePosition(newLocation: String) {
+        self.activityIndicator.startAnimating()
         CLGeocoder().geocodeAddressString(newLocation) { (newMarker, error) in
             if let error = error {
                 self.showAlert(message: error.localizedDescription, title: "Location Not Found")
@@ -72,6 +65,7 @@ class AddListViewController: UIViewController {
                 
                 if let location = location {
                     self.loadNewLocation(location.coordinate)
+                    self.activityIndicator.stopAnimating()
                 } else {
                     self.showAlert(message: "Please try again later.", title: "Error")
                 }
@@ -81,41 +75,16 @@ class AddListViewController: UIViewController {
     
     func loadNewLocation(_ coordinate: CLLocationCoordinate2D) {
         let controller = storyboard?.instantiateViewController(withIdentifier: "AddMapViewController") as! AddMapViewController
-        controller.studentInformation = buildStudentInfo(coordinate)
+//        controller.studentInformation = buildStudentInfo(coordinate)
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
-    func buildStudentInfo(_ coordinate: CLLocationCoordinate2D) -> StudentInformation {
-        
-        var studentInfo = [
-            "uniqueKey": UdacityData.Auth.key,
-            "firstName": firstNameTextField.text!,
-            "lastName": lastNameTextField.text!,
-            "mapString": locationTextField.text!,
-            "mediaURL": UdacityData.Auth.mediaURL,
-            "latitude": coordinate.latitude,
-            "longitude": coordinate.longitude,
-        ] as [String: AnyObject]
-        
-        if let objectId = objectId {
-            studentInfo["objectId"] = objectId as AnyObject
-            print(objectId)
-        }
-        
-        return StudentInformation(studentInfo)
-        
-    }
+    
     func subscribeToKeyboardNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
     }
     @objc func keyboardWillShow(_ notification: Notification) {
-           if firstNameTextField.isFirstResponder {
-               view.frame.origin.y = getKeyboardHeight(notification) * (0)
-           }
-           if lastNameTextField.isFirstResponder {
-               view.frame.origin.y = getKeyboardHeight(notification) * (-0.2)
-           }
            if locationTextField.isFirstResponder {
                view.frame.origin.y = getKeyboardHeight(notification) * (-0.5)
            }

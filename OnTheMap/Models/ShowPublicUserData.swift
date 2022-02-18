@@ -9,19 +9,30 @@ import Foundation
 import UIKit
 
 class ShowPublicUserData {
-    func showPublicUserData() {
-        
-        let request = URLRequest(url: URL(string: "https://onthemap-api.udacity.com/v1/users/3903878747")!)
+    func showPublicUserData(key: String, nickname: String, lastName: String, completion: @escaping(LoginUdacityResult?) -> Void) {
+        var request = URLRequest(url: URL(string: "https://onthemap-api.udacity.com/v1/users/<user_id>")!)
+        request.httpMethod = "GET"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = "{\"user\":  \"key\":\"\(key)\", \"nickname\":\"\(nickname)\",\"last_name\":\"\(lastName)\"}".data(using: .utf8)
         let session = URLSession.shared
-        let task = session.dataTask(with: request) { data, response, error in
-            if error != nil {
-               return
+        let task = session.dataTask(with: request) { data, _, error in
+          if error != nil {
+              completion(nil)
+              return
+          }
+          let range = 5..<data!.count
+          let newData = data?.subdata(in: range)
+            guard let decoded = try? JSONDecoder().decode(LoginUdacityResult.self, from: newData!) else {
+                print(String(data: newData!, encoding: .utf8)!)
+                completion(nil)
+                return
             }
-            let range = 5..<data!.count
-            let newData = data?.subdata(in: range) 
-            print(String(data: newData!, encoding: .utf8)!)
+            completion(decoded)
         }
         task.resume()
     }
 }
+   
 
+     
+       

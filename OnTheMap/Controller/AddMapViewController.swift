@@ -45,20 +45,20 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         if let studentLocation = studentInformation {
-            let studentLocation = Location(
-                objectId: studentLocation.objectId ?? "",
-                uniqueKey: studentLocation.uniqueKey,
-                firstName: studentLocation.firstName,
-                lastName: studentLocation.lastName,
-                mapString: studentLocation.mapString,
-                mediaURL:  studentLocation.mediaURL,
-                latitude: studentLocation.latitude,
-                longitude: studentLocation.longitude,
-                createdAt: studentLocation.createdAt ?? "",
-                updatedAt: studentLocation.updatedAt ?? ""
-            )
-            showLocations(location: studentLocation)
-        }
+                   let studentLocation = StudentInformation(
+                    createdAt: studentLocation.createdAt ?? "",
+                    firstName: studentLocation.firstName ,
+                    lastName: studentLocation.lastName,
+                    latitude: studentLocation.latitude,
+                    longitude: studentLocation.longitude,
+                    mapString:  studentLocation.mapString,
+                    mediaURL: studentLocation.mediaURL,
+                    objectId: studentLocation.objectId,
+                    uniqueKey: studentLocation.uniqueKey ?? "",
+                    updatedAt: studentLocation.updatedAt ?? ""
+                   )
+                   showLocations(location: studentLocation)
+               }
         view.addSubview(tapButton)
         tapButton.topAnchor.constraint(equalTo: mapView.bottomAnchor).isActive = true
         tapButton.centerXAnchor.constraint(equalTo: mapView.centerXAnchor).isActive = true
@@ -70,8 +70,8 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func finished() {
-        guard let url = URL(string: self.webTextField.text!), UIApplication.shared.canOpenURL(url) else {
-            self.showAlert(message: "Please include 'http://' in your link.", title: "Invalid URL")
+        guard let url = URL(string: self.webTextField.text!) else {
+            self.showAlert(message: "Please include 'www' in your link.", title: "Invalid URL")
             return
         }
         if let studentLocation = studentInformation {
@@ -79,6 +79,7 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
                 UdacityData.addStudentLocation(information: studentLocation) { (success, error) in
                     if success {
                         DispatchQueue.main.async {
+                            UIApplication.shared.canOpenURL(url)
                             self.dismiss(animated: true, completion: nil)
                         }
                     } else {
@@ -86,28 +87,7 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
                             self.showAlert(message: error?.localizedDescription ?? "", title: "Error")
                         }
                     }
-                }
-            } else {
-                let alertVC = UIAlertController(title: "", message: "This student has already posted a location. Would you like to overwrite this location?", preferredStyle: .alert)
-                alertVC.addAction(UIAlertAction(title: "Overwrite", style: .default, handler: { (action: UIAlertAction) in
-                    UdacityData.updateStudentLocation(information: studentLocation) { (success, error) in
-                        if success {
-                            DispatchQueue.main.async {
-                                self.dismiss(animated: true, completion: nil)
-                            }
-                        } else {
-                            DispatchQueue.main.async {
-                                self.showAlert(message: error?.localizedDescription ?? "", title: "Error")
-                            }
-                        }
-                    }
-                }))
-                alertVC.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction) in
-                    DispatchQueue.main.async {
-                        alertVC.dismiss(animated: true, completion: nil)
-                    }
-                }))
-                self.present(alertVC, animated: true)
+            }
             }
         }
         guard studentInformation != nil else {
@@ -117,13 +97,13 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
         present(controller, animated: true, completion: nil)
     }
     
-    func showLocations(location: Location) {
+    func showLocations(location: StudentInformation) {
         self.activityIndicator.startAnimating()
         mapView.removeAnnotations(mapView.annotations)
         if let coordinate = extractCoordinate(location: location) {
             let annotation = MKPointAnnotation()
-            annotation.title = location.locationLabel
-            annotation.subtitle = location.mediaURL ?? ""
+            annotation.title = location.uniqueKey
+            annotation.subtitle = location.mediaURL
             annotation.coordinate = coordinate
             mapView.addAnnotation(annotation)
             mapView.showAnnotations(mapView.annotations, animated: true)
@@ -131,7 +111,7 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func extractCoordinate(location: Location) -> CLLocationCoordinate2D? {
+    func extractCoordinate(location: StudentInformation) -> CLLocationCoordinate2D? {
         if let lat = location.latitude, let lon = location.longitude {
             return CLLocationCoordinate2DMake(lat, lon)
         }

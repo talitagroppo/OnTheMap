@@ -8,7 +8,7 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, UINavigationControllerDelegate {
+class MapViewController: UIViewController {
     
     @IBOutlet var mapView: MKMapView!
     
@@ -16,13 +16,34 @@ class MapViewController: UIViewController, UINavigationControllerDelegate {
     
     @IBOutlet var addNewLocation: UIBarButtonItem!
     
-    var locations = [StudentInformation]()
-    
     var annotations = [MKPointAnnotation]()
+    
+    var studentInformation: StudentInformation?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
+        newTest()
+    }
+    
+    func newTest() {
+        DispatchQueue.main.async {
+            guard let uniqueKey = (UIApplication.shared.delegate as? AppDelegate)?.uniqueKey else { fatalError() }
+            DispatchQueue.global(qos: .utility).async {
+                let url = UdacityData.Endpoints.getLoggedInUserProfile(uniqueKey).url
+                let getProfile = GetLoggedInUserProfile(url: url)
+                getProfile.execute { result in
+                    switch result {
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    case .success(let studentLocation):
+                        DispatchQueue.main.async {
+                            self.studentInformation = studentLocation
+                        }
+                    }
+                }
+            }
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -32,9 +53,9 @@ class MapViewController: UIViewController, UINavigationControllerDelegate {
     }
     @IBAction func addNewLocation(_ sender: UIButton) {
         let vc = storyboard?.instantiateViewController(withIdentifier: AddListViewController.identifier) as! AddListViewController
+        vc.studentInformation = studentInformation
         navigationController?.pushViewController(vc, animated: true)
     }
-    
     @IBAction func refreshMap(_ sender: UIBarButtonItem) {
         self.activityIndicator.startAnimating()
         mapView.reloadInputViews()
@@ -46,7 +67,6 @@ class MapViewController: UIViewController, UINavigationControllerDelegate {
         UdacityData.getStudentLocations() { locations, error in
             self.mapView.removeAnnotations(self.annotations)
             self.annotations.removeAll()
-            self.locations = locations ?? []
             for dictionary in locations ?? [] {
                 let lat = CLLocationDegrees(dictionary.latitude ?? 0.0)
                 let long = CLLocationDegrees(dictionary.longitude ?? 0.0)
@@ -57,7 +77,7 @@ class MapViewController: UIViewController, UINavigationControllerDelegate {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = coordinate
                 annotation.title = "\(first) \(last)"
-                annotation.subtitle = mediaURL
+                annotation.subtitle = "\(String(describing: mediaURL))"
                 self.annotations.append(annotation)
                 self.activityIndicator.isHidden = true
             }
@@ -76,7 +96,9 @@ extension MapViewController: MKMapViewDelegate {
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView?.canShowCallout = true
-            let detailButton = UIButton(type: .detailDisclosure)
+            let detailButton = PinButton(type: .detailDisclosure)
+            detailButton.annotation = annotation
+            detailButton.addTarget(self, action: #selector(pinButtonClicked), for: .touchUpInside)
             pinView?.rightCalloutAccessoryView = detailButton
         }
         else {
@@ -85,17 +107,13 @@ extension MapViewController: MKMapViewDelegate {
         return pinView
     }
     
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        guard let studentLocation = view.annotation as? UdacityData else {return}
-        let studentInfo = studentLocation
-        let alert = UIAlertController(title: ("\(studentInfo)"), message: "\(UdacityData.Auth.mediaURL)", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-        if control == view.rightCalloutAccessoryView {
-            if let userURL = view.annotation?.subtitle{
-                userUrl(userURL ?? "")
-            }
-        }
+    @objc func pinButtonClicked(_ sender: PinButton) {
+        guard let url = sender.annotation?.subtitle else { return  }
+        userUrl(url!)
     }
     
+}
+
+class PinButton: UIButton {
+    var annotation: MKAnnotation?
 }

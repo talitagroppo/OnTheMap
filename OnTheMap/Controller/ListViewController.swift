@@ -29,18 +29,24 @@ class ListViewController: UITableViewController {
         navigationController?.navigationBar.isHidden = false
     }
     
+    @IBAction func logout(_ sender: Any) {
+            UdacityData.logout {
+                DispatchQueue.main.async {
+                    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") else { return }
+                self.navigationController?.pushViewController(vc, animated: false)
+            }
+            }
+        }
+    
     
     @IBAction func addNewData(_ sender: UIButton) {
         let vc = storyboard?.instantiateViewController(withIdentifier: AddListViewController.identifier) as! AddListViewController
         navigationController?.pushViewController(vc, animated: true)
     }
     
-    @IBAction func refreshList(_ sender: UIBarButtonItem) {
-        getStudentsList()
-    }
-    
     func getStudentsList() {
         UdacityData.getStudentLocations() {students, error in
+         print(students)
             self.students = students ?? []
             DispatchQueue.main.async {
                 self.tableViewList.reloadData()
@@ -60,12 +66,12 @@ class ListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: ListViewController.identifier, for: indexPath)
         let student = students[indexPath.row]
         cell.textLabel?.text = "        \(student.firstName)" + " " + "\(student.lastName)"
-        cell.detailTextLabel?.text = "\(student.mediaURL ?? "")"
+        cell.detailTextLabel?.text = "\(student.mediaURL)"
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let student = students[indexPath.row]
-        userUrl(student.mediaURL ?? "")
+        userUrl(student.mediaURL)
     }
 }
