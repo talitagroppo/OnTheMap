@@ -6,7 +6,6 @@
 //
 
 import Foundation
-
 struct StudentInformation: Codable {
     let createdAt: String?
     let firstName: String
@@ -14,7 +13,7 @@ struct StudentInformation: Codable {
     let latitude: Double?
     let longitude: Double?
     let mapString: String?
-    var mediaURL: String?
+    let mediaURL: String?
     let objectId: String?
     let uniqueKey: String?
     let updatedAt: String?
@@ -50,4 +49,7 @@ struct StudentInformation: Codable {
         return name
     }
  
+}
+struct StudentsLocation: Codable {
+    let results: [StudentInformation]
 }

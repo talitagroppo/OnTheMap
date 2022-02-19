@@ -22,7 +22,6 @@ class AddListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(studentInformation)
     }
     
     override func viewWillAppear(_ animated: Bool) {

@@ -44,21 +44,10 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let studentLocation = studentInformation {
-                   let studentLocation = StudentInformation(
-                    createdAt: studentLocation.createdAt ?? "",
-                    firstName: studentLocation.firstName ,
-                    lastName: studentLocation.lastName,
-                    latitude: studentLocation.latitude,
-                    longitude: studentLocation.longitude,
-                    mapString:  studentLocation.mapString,
-                    mediaURL: studentLocation.mediaURL,
-                    objectId: studentLocation.objectId,
-                    uniqueKey: studentLocation.uniqueKey ?? "",
-                    updatedAt: studentLocation.updatedAt ?? ""
-                   )
-                   showLocations(location: studentLocation)
-               }
+        guard let studentInformation = studentInformation else {
+            fatalError()
+        }
+        showLocations(location: studentInformation)
         view.addSubview(tapButton)
         tapButton.topAnchor.constraint(equalTo: mapView.bottomAnchor).isActive = true
         tapButton.centerXAnchor.constraint(equalTo: mapView.centerXAnchor).isActive = true
@@ -74,7 +63,8 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
             self.showAlert(message: "Please include 'www' in your link.", title: "Invalid URL")
             return
         }
-        if let studentLocation = studentInformation {
+        if var studentLocation = studentInformation {
+            studentLocation.mediaURL = url.absoluteString
             if UdacityData.Auth.objectId == "" {
                 UdacityData.addStudentLocation(information: studentLocation) { (success, error) in
                     if success {
@@ -87,7 +77,7 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
                             self.showAlert(message: error?.localizedDescription ?? "", title: "Error")
                         }
                     }
-            }
+                }
             }
         }
         guard studentInformation != nil else {
@@ -122,9 +112,9 @@ class AddMapViewController: UIViewController, MKMapViewDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
     }
     @objc func keyboardWillShow(_ notification: Notification) {
-           if webTextField.isFirstResponder {
-               view.frame.origin.y = getKeyboardHeight(notification) * (0)
-           }
-}
+        if webTextField.isFirstResponder {
+            view.frame.origin.y = getKeyboardHeight(notification) * (0)
+        }
+    }
 }
 

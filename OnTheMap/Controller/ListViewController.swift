@@ -46,7 +46,6 @@ class ListViewController: UITableViewController {
     
     func getStudentsList() {
         UdacityData.getStudentLocations() {students, error in
-         print(students)
             self.students = students ?? []
             DispatchQueue.main.async {
                 self.tableViewList.reloadData()
@@ -66,12 +65,12 @@ class ListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: ListViewController.identifier, for: indexPath)
         let student = students[indexPath.row]
         cell.textLabel?.text = "        \(student.firstName)" + " " + "\(student.lastName)"
-        cell.detailTextLabel?.text = "\(student.mediaURL)"
+        cell.detailTextLabel?.text = "\(String(describing: student.mediaURL))"
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let student = students[indexPath.row]
-        userUrl(student.mediaURL)
+        guard let mediaURL = students[indexPath.row].mediaURL else { return }
+        userUrl(mediaURL)
     }
 }
