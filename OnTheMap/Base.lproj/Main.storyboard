@@ -17,7 +17,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="leX-kd-Rxe" userLabel="emailTextField">
-                                <rect key="frame" x="20" y="431" width="374" height="34"/>
+                                <rect key="frame" x="20" y="191" width="374" height="34"/>
                                 <accessibility key="accessibilityConfiguration">
                                     <accessibilityTraits key="traits" keyboardKey="YES"/>
                                 </accessibility>
@@ -25,7 +25,7 @@
                                 <textInputTraits key="textInputTraits" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="username"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Qbz-rE-Rhh" userLabel="PasswordTextField">
-                                <rect key="frame" x="20" y="473" width="374" height="34"/>
+                                <rect key="frame" x="20" y="233" width="374" height="34"/>
                                 <accessibility key="accessibilityConfiguration">
                                     <accessibilityTraits key="traits" keyboardKey="YES"/>
                                 </accessibility>
@@ -33,16 +33,16 @@
                                 <textInputTraits key="textInputTraits" returnKeyType="next" enablesReturnKeyAutomatically="YES" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login Udacity" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wxf-gn-6Jm">
-                                <rect key="frame" x="138.5" y="374" width="137" height="28"/>
+                                <rect key="frame" x="138.5" y="134" width="137" height="28"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="23"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo-u" translatesAutoresizingMaskIntoConstraints="NO" id="Eit-RZ-zUu">
-                                <rect key="frame" x="175" y="304" width="64" height="62"/>
+                                <rect key="frame" x="175" y="64" width="64" height="62"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JqI-oT-ete">
-                                <rect key="frame" x="140" y="540" width="134" height="31"/>
+                                <rect key="frame" x="177.5" y="300" width="59.5" height="31"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Login">
                                     <backgroundConfiguration key="background">
@@ -57,15 +57,14 @@
                         <viewLayoutGuide key="safeArea" id="btp-4H-Thk"/>
                         <color key="backgroundColor" systemColor="systemOrangeColor"/>
                         <constraints>
-                            <constraint firstItem="Wxf-gn-6Jm" firstAttribute="top" secondItem="5up-F2-UL1" secondAttribute="top" constant="374" id="25d-nj-SCg"/>
                             <constraint firstItem="Wxf-gn-6Jm" firstAttribute="centerX" secondItem="Qbz-rE-Rhh" secondAttribute="centerX" id="2FQ-ry-HNa"/>
                             <constraint firstItem="Eit-RZ-zUu" firstAttribute="leading" secondItem="btp-4H-Thk" secondAttribute="leading" constant="175" id="8gK-DI-CAN"/>
                             <constraint firstItem="JqI-oT-ete" firstAttribute="top" secondItem="Qbz-rE-Rhh" secondAttribute="bottom" constant="33" id="AwO-hx-XJO"/>
                             <constraint firstItem="Eit-RZ-zUu" firstAttribute="centerX" secondItem="Wxf-gn-6Jm" secondAttribute="centerX" id="CxU-7Z-BOU"/>
                             <constraint firstItem="Qbz-rE-Rhh" firstAttribute="top" secondItem="leX-kd-Rxe" secondAttribute="bottom" constant="8" symbolic="YES" id="ETg-gG-5FC"/>
-                            <constraint firstItem="JqI-oT-ete" firstAttribute="leading" secondItem="btp-4H-Thk" secondAttribute="leading" constant="140" id="Gnc-Pd-hp8"/>
                             <constraint firstItem="JqI-oT-ete" firstAttribute="centerX" secondItem="Qbz-rE-Rhh" secondAttribute="centerX" id="TSD-qZ-MIq"/>
                             <constraint firstItem="Qbz-rE-Rhh" firstAttribute="leading" secondItem="leX-kd-Rxe" secondAttribute="leading" id="aJ8-z9-HqT"/>
+                            <constraint firstItem="Eit-RZ-zUu" firstAttribute="top" secondItem="btp-4H-Thk" secondAttribute="top" constant="20" id="fJA-iC-7B2"/>
                             <constraint firstItem="Wxf-gn-6Jm" firstAttribute="centerX" secondItem="5up-F2-UL1" secondAttribute="centerX" id="fU6-k7-60X"/>
                             <constraint firstItem="Wxf-gn-6Jm" firstAttribute="centerX" secondItem="leX-kd-Rxe" secondAttribute="centerX" id="jSz-me-AVa"/>
                             <constraint firstItem="leX-kd-Rxe" firstAttribute="top" secondItem="Wxf-gn-6Jm" secondAttribute="bottom" constant="29" id="nfW-qW-pSl"/>
