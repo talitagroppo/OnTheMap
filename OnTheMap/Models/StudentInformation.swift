@@ -8,16 +8,40 @@
 import Foundation
 
 struct StudentInformation: Codable {
-    let createdAt: String?
-    let firstName: String
-    let lastName: String
-    let latitude: Double?
-    let longitude: Double?
-    let mapString: String?
+    var createdAt: String?
+    var firstName: String
+    var lastName: String
+    var latitude: Double?
+    var longitude: Double?
+    var mapString: String?
     var mediaURL: String?
-    let objectId: String?
-    let uniqueKey: String?
-    let updatedAt: String?
+    var objectId: String?
+    var uniqueKey: String?
+    var updatedAt: String?
+    
+    init(
+        createdAt: String? = nil,
+        firstName: String,
+        lastName: String,
+        latitude: Double? = nil,
+        longitude: Double? = nil,
+        mapString: String? = nil,
+        mediaURL: String? = nil,
+        objectId: String? = nil,
+        uniqueKey: String? = nil,
+        updatedAt: String? = nil
+    ) {
+        self.createdAt = createdAt
+        self.firstName = firstName
+        self.lastName = lastName
+        self.latitude = latitude
+        self.longitude = longitude
+        self.mapString = mapString
+        self.mediaURL = mediaURL
+        self.objectId = objectId
+        self.uniqueKey = uniqueKey
+        self.updatedAt = updatedAt
+    }
     
     init(_ dictionary: [String: AnyObject]) {
         self.createdAt = dictionary["createdAt"] as? String

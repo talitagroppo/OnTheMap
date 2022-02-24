@@ -40,7 +40,8 @@ class ListViewController: UITableViewController {
     
     
     @IBAction func addNewData(_ sender: UIButton) {
-        let vc = storyboard?.instantiateViewController(withIdentifier: AddListViewController.identifier) as! AddListViewController
+        let vc = storyboard?.instantiateViewController(withIdentifier: "AddListViewController") as! AddListViewController
+//        vc.studentInformation = studentInformation
         navigationController?.pushViewController(vc, animated: true)
     }
     

@@ -8,12 +8,35 @@
 import Foundation
 import MapKit
 
+enum GeocodePositionError: Error {
+    case unknown
+}
+
+typealias GeocodePositionHandler = (Result<CLLocation, Error>) -> Void
+typealias LoadNewLocationHandler = (Result<StudentInformation, Error>) -> Void
+
 class AddListViewController: UIViewController {
     
     static var identifier = "AddListViewController"
     
     @IBOutlet var locationTextField: UITextField!
-   
+    
+    var firstNameTextField: UITextField = {
+        var textfield = UITextField()
+        textfield.translatesAutoresizingMaskIntoConstraints = false
+        textfield.placeholder = "First Name"
+        textfield.isHidden = true
+        return textfield
+    }()
+    
+    var secondNameTextField: UITextField = {
+        var textfield = UITextField()
+        textfield.translatesAutoresizingMaskIntoConstraints = false
+        textfield.placeholder = "Second Name"
+        textfield.isHidden = true
+        return textfield
+    }()
+    
     var objectId: String?
     
     var studentInformation: StudentInformation?
@@ -22,6 +45,16 @@ class AddListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if studentInformation == nil {
+            view.addSubview(firstNameTextField)
+            view.addSubview(secondNameTextField)
+            firstNameTextField.isHidden = false
+            secondNameTextField.isHidden = false
+            firstNameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8).isActive = true
+            firstNameTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8).isActive = true
+            secondNameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8).isActive = true
+            secondNameTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8).isActive = true
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,22 +72,24 @@ class AddListViewController: UIViewController {
     }
     
     @IBAction func findLocation(sender: UIButton) {
-        guard let newLocation = locationTextField.text
-        else { return }
-        if newLocation.isEmpty {
-            self.showAlert(message: "Please select the location.", title: "Unknow.")
-            return
-        } else {
-            geocodePosition(newLocation: newLocation)
+        loadNewLocation { result in
+            switch result {
+            case .failure(let error):
+                self.showAlert(message: error.localizedDescription, title: "Error")
+            case .success(let studentInformation):
+                let controller = self.storyboard?.instantiateViewController(withIdentifier: "AddMapViewController") as! AddMapViewController
+                controller.studentInformation = studentInformation
+                self.navigationController?.pushViewController(controller, animated: true)
+            }
         }
     }
     
-    func geocodePosition(newLocation: String) {
+    func geocodePosition(newLocation: String, completion: @escaping GeocodePositionHandler) {
         self.activityIndicator.startAnimating()
         CLGeocoder().geocodeAddressString(newLocation) { (newMarker, error) in
             if let error = error {
                 self.showAlert(message: error.localizedDescription, title: "Location Not Found")
-                print("Location not found.")
+                completion(.failure(error))
             } else {
                 var location: CLLocation?
                 
@@ -63,19 +98,54 @@ class AddListViewController: UIViewController {
                 }
                 
                 if let location = location {
-                    self.loadNewLocation(location.coordinate)
-                    self.activityIndicator.stopAnimating()
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                    }
+                    completion(.success(location))
                 } else {
-                    self.showAlert(message: "Please try again later.", title: "Error")
+                    completion(.failure(GeocodePositionError.unknown))
                 }
             }
         }
     }
     
-    func loadNewLocation(_ coordinate: CLLocationCoordinate2D) {
-        let controller = storyboard?.instantiateViewController(withIdentifier: "AddMapViewController") as! AddMapViewController
-//        controller.studentInformation = buildStudentInfo(coordinate)
-        self.navigationController?.pushViewController(controller, animated: true)
+    func loadNewLocation(completion: @escaping LoadNewLocationHandler) {
+        guard let locationName = locationTextField.text  else {
+            self.showAlert(message: "Please try again later.", title: "Error")
+            completion(.failure(GeocodePositionError.unknown))
+            return
+        }
+        geocodePosition(newLocation: locationName) { [weak self] result in
+            switch result {
+            case .failure(let error):
+                self?.showAlert(message: "\(error.localizedDescription)", title: "Error")
+                completion(.failure(error))
+            case .success(let location):
+                if var studentLocation = self?.studentInformation {
+                    studentLocation.latitude = location.coordinate.latitude
+                    studentLocation.longitude = location.coordinate.longitude
+                    completion(.success(studentLocation))
+                    return
+                } else {
+                    DispatchQueue.main.async {
+                        let uniqueKey = (UIApplication.shared.delegate as? AppDelegate)?.uniqueKey
+                        let studentInformation = StudentInformation(
+                            createdAt: Date.now.ISO8601Format(),
+                            firstName: self?.firstNameTextField.text ?? "Talita",
+                            lastName: self?.secondNameTextField.text ?? "Groppo",
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude,
+                            mapString: nil,
+                            mediaURL: nil,
+                            objectId: nil,
+                            uniqueKey: uniqueKey,
+                            updatedAt: Date.now.ISO8601Format()
+                        )
+                        completion(.success(studentInformation))
+                    }
+                }
+            }
+        }
     }
     
     
@@ -84,8 +154,8 @@ class AddListViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
     }
     @objc func keyboardWillShow(_ notification: Notification) {
-           if locationTextField.isFirstResponder {
-               view.frame.origin.y = getKeyboardHeight(notification) * (-0.5)
-           }
+        if locationTextField.isFirstResponder {
+            view.frame.origin.y = getKeyboardHeight(notification) * (-0.5)
+        }
     }
 }

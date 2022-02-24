@@ -20,13 +20,13 @@ class MapViewController: UIViewController {
     
     var studentInformation: StudentInformation?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        mapView.delegate = self
-        newTest()
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        getStudentsPins()
+        navigationController?.navigationBar.isHidden = false
     }
-    
-    func newTest() {
+    @IBAction func addNewLocation(_ sender: UIButton) {
+        let vc = storyboard?.instantiateViewController(withIdentifier: AddListViewController.identifier) as! AddListViewController
         DispatchQueue.main.async {
             guard let uniqueKey = (UIApplication.shared.delegate as? AppDelegate)?.uniqueKey else { fatalError() }
             DispatchQueue.global(qos: .utility).async {
@@ -35,35 +35,31 @@ class MapViewController: UIViewController {
                 getProfile.execute { result in
                     switch result {
                     case .failure(let error):
+                        // MARK: - New student
                         print(error.localizedDescription)
-                    case .success(let studentLocation):
                         DispatchQueue.main.async {
-                            self.studentInformation = studentLocation
+                            vc.studentInformation = nil
+                            self.navigationController?.pushViewController(vc, animated: true)
+                            return
+                        }
+                    case .success(let studentLocation):
+                        // MARK: - Override student location
+                        DispatchQueue.main.async {
+                            vc.studentInformation = studentLocation
+                            self.navigationController?.pushViewController(vc, animated: true)
+                            return
                         }
                     }
                 }
             }
         }
     }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(true)
-        getStudentsPins()
-        navigationController?.navigationBar.isHidden = false
-    }
-    @IBAction func addNewLocation(_ sender: UIButton) {
-        let vc = storyboard?.instantiateViewController(withIdentifier: AddListViewController.identifier) as! AddListViewController
-        vc.studentInformation = studentInformation
-        navigationController?.pushViewController(vc, animated: true)
-    }
     @IBAction func refreshMap(_ sender: UIBarButtonItem) {
-        self.activityIndicator.startAnimating()
         mapView.reloadInputViews()
-        self.activityIndicator.isHidden = true
     }
     
     func getStudentsPins() {
-        self.activityIndicator.startAnimating()
+        self.activityIndicatorisHide(true)
         UdacityData.getStudentLocations() { locations, error in
             self.mapView.removeAnnotations(self.annotations)
             self.annotations.removeAll()
@@ -79,13 +75,16 @@ class MapViewController: UIViewController {
                 annotation.title = "\(first) \(last)"
                 annotation.subtitle = "\(String(describing: mediaURL))"
                 self.annotations.append(annotation)
-                self.activityIndicator.isHidden = true
+                self.activityIndicatorisHide(false)
             }
             DispatchQueue.main.async {
                 self.mapView.addAnnotations(self.annotations)
                 self.activityIndicator.stopAnimating()
             }
         }
+    }
+    func activityIndicatorisHide(_ isHide: Bool){
+        self.activityIndicator.hidesWhenStopped = isHide
     }
 }
 

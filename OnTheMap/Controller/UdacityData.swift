@@ -117,6 +117,7 @@ class UdacityData: NSObject {
     
     
     class func addStudentLocation(information: StudentInformation, completion: @escaping (Bool, Error?) -> Void) {
+        print(information)
         let body = "{\"uniqueKey\": \"\(information.uniqueKey ?? "")\", \"firstName\": \"\(information.firstName)\", \"lastName\": \"\(information.lastName)\",\"mapString\": \"\(information.mapString ?? "")\", \"mediaURL\": \"\(information.mediaURL ?? "")\",\"latitude\": \(information.latitude ?? 0.0), \"longitude\": \(information.longitude ?? 0.0)}"
         RequestHelpers.taskForPOSTRequest(
             url: Endpoints.addLocation.url,
